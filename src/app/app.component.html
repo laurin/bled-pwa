@@ -1,9 +1,12 @@
 <h1>STF-Eis-Remote</h1>
-<hr>
+<hr />
 <ng-container *ngIf="!(ledController.connected | async)">
   <app-previous-devices></app-previous-devices>
   <button (click)="pair()">Scan</button>
-  <hr>
 </ng-container>
-<app-color-picker #colorPicker [class.invisible]="!(ledController.connected | async)" (input)="colorChange($event)">
+
+<app-color-picker #colorPicker (input)="colorChange($event)" [hidden]="!(ledController.connected | async)">
 </app-color-picker>
+<button (click)="ledController.disconnect()" *ngIf="ledController.connected | async">Disconnect</button>
+
+<hr />

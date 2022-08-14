@@ -25,11 +25,12 @@ export class PreviousDevicesComponent implements OnInit {
 
   connect(device: BluetoothDevice) {
     const abortController = new AbortController();
-    console.log(device);
     device.addEventListener('advertisementreceived', event => {
       abortController.abort();
       this.ledController.setDevice(device);
-    })
+      // @ts-ignore
+      device.removeAllListeners('advertisementreceived');
+    });
     device.watchAdvertisements({ signal: abortController.signal });
   }
 
@@ -37,5 +38,4 @@ export class PreviousDevicesComponent implements OnInit {
     await device.forget();
     this.loadDevices();
   }
-
 }

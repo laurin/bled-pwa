@@ -28,7 +28,11 @@ export class LedControllerService {
   }
 
   async setDevice(bleDevice: BluetoothDevice) {
-    bleDevice.addEventListener('gattserverdisconnected', () => this.connected.next(false));
+    bleDevice.addEventListener('gattserverdisconnected', () => {
+      this.connected.next(false);
+      console.log('device disconnected');
+      delete this.colorCharacteristic;
+    });
     const gattServer = await bleDevice.gatt!.connect();
     console.log('gatt server connected');
     const ledService = await gattServer.getPrimaryService(LED_SERVICE_UUID);
@@ -43,7 +47,6 @@ export class LedControllerService {
     });
     console.log('event listener added');
     const val = await this.colorCharacteristic.readValue();
-    console.log(val);
 
     this.applyColor(val);
     this.connected.next(true);
@@ -68,5 +71,9 @@ export class LedControllerService {
   async setColor(color: RgbColor) {
     if (!this.colorCharacteristic) { return; }
     await this.colorCharacteristic.writeValueWithoutResponse(new Uint8Array([color.r, color.g, color.b]));
+  }
+
+  async disconnect() {
+    await this.colorCharacteristic?.service.device.gatt?.disconnect();
   }
 }
