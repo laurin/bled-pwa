@@ -8,6 +8,7 @@ import { AutoconnectSelectorComponent } from './autoconnect-selector/autoconnect
 import { FormsModule } from '@angular/forms';
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { environment } from '../environments/environment';
+import { UpdateNotificationComponent } from './update-notification/update-notification.component';
 
 @NgModule({
   declarations: [
@@ -15,6 +16,7 @@ import { environment } from '../environments/environment';
     ColorPickerComponent,
     PreviousDevicesComponent,
     AutoconnectSelectorComponent,
+    UpdateNotificationComponent,
   ],
   imports: [
     BrowserModule,
