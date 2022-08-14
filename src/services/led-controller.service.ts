@@ -54,7 +54,6 @@ export class LedControllerService {
       });
       console.log('event listener added');
       const val = await this.colorCharacteristic.readValue();
-
       this.applyColor(val);
       this.connectionStatus.next('connected');
     } catch {
