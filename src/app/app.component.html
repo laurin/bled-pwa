@@ -1,5 +1,5 @@
 <h1>STF-Eis-Remote</h1>
-<br>
+<br />
 <button (click)="pair()">pair</button>
-<br><br>
-<app-color-picker [class.invisible]="!(ledController.connected | async)" (input)="colorChange($event)"></app-color-picker>
+<br /><br />
+<app-color-picker #colorPicker [class.invisible]="!(ledController.connected | async)" (input)="colorChange($event)"></app-color-picker>
