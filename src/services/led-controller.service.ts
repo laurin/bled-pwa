@@ -8,11 +8,13 @@ import { LocalStorageService } from './local-storage.service';
 const LED_SERVICE_UUID = "c7564aae-99ee-4874-848b-8a01f00d71bd";
 const LED_COLOR_CHARACTERISTIC_UUID = "88db6efe-6abe-477f-bced-b5b0f5984320";
 
+export type ConnectionStatus = 'disconnected' | 'connecting' | 'connected' | 'disconnecting';
+
 @Injectable({
   providedIn: 'root'
 })
 export class LedControllerService {
-  connected = new BehaviorSubject(false);
+  connectionStatus = new BehaviorSubject<ConnectionStatus>('disconnected');
   color = new BehaviorSubject({ r: 0, g: 0, b: 0 });
   private colorCharacteristic?: BluetoothRemoteGATTCharacteristic;
 
@@ -31,28 +33,33 @@ export class LedControllerService {
   }
 
   async setDevice(bleDevice: BluetoothDevice) {
-    bleDevice.addEventListener('gattserverdisconnected', () => {
-      this.connected.next(false);
-      console.log('device disconnected');
-      delete this.colorCharacteristic;
-    });
-    const gattServer = await bleDevice.gatt!.connect();
-    console.log('gatt server connected');
-    const ledService = await gattServer.getPrimaryService(LED_SERVICE_UUID);
-    console.log('service retrieved');
-    this.colorCharacteristic = await ledService.getCharacteristic(LED_COLOR_CHARACTERISTIC_UUID);
-    console.log('characteristic retrieved');
-    await this.colorCharacteristic.startNotifications();
-    console.log('notifications started');
-    this.colorCharacteristic.addEventListener('characteristicvaluechanged', (event) => {
-      // @ts-ignore
-      this.applyColor(event.srcElement.value);
-    });
-    console.log('event listener added');
-    const val = await this.colorCharacteristic.readValue();
+    this.connectionStatus.next('connecting');
+    try {
+      bleDevice.addEventListener('gattserverdisconnected', () => {
+        this.connectionStatus.next('disconnected');
+        console.log('device disconnected');
+        delete this.colorCharacteristic;
+      });
+      const gattServer = await bleDevice.gatt!.connect();
+      console.log('gatt server connected');
+      const ledService = await gattServer.getPrimaryService(LED_SERVICE_UUID);
+      console.log('service retrieved');
+      this.colorCharacteristic = await ledService.getCharacteristic(LED_COLOR_CHARACTERISTIC_UUID);
+      console.log('characteristic retrieved');
+      await this.colorCharacteristic.startNotifications();
+      console.log('notifications started');
+      this.colorCharacteristic.addEventListener('characteristicvaluechanged', (event) => {
+        // @ts-ignore
+        this.applyColor(event.srcElement.value);
+      });
+      console.log('event listener added');
+      const val = await this.colorCharacteristic.readValue();
 
-    this.applyColor(val);
-    this.connected.next(true);
+      this.applyColor(val);
+      this.connectionStatus.next('connected');
+    } catch {
+      this.connectionStatus.next('disconnected');
+    }
   }
 
   private applyColor(value: DataView) {
@@ -75,6 +82,7 @@ export class LedControllerService {
   }
 
   async disconnect() {
+    this.connectionStatus.next('disconnecting');
     await this.colorCharacteristic?.service.device.gatt?.disconnect();
   }
 

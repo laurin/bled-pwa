@@ -1,13 +1,20 @@
 <h1>STF-Eis-Remote</h1>
 <hr />
-<ng-container *ngIf="!(ledController.connected | async)">
+<ng-container *ngIf="(ledController.connectionStatus | async) === 'disconnected'">
   <app-previous-devices></app-previous-devices>
   <button (click)="pair()">Scan</button>
 </ng-container>
 
-<app-color-picker #colorPicker (input)="colorChange($event)" [hidden]="!(ledController.connected | async)">
+<p class="waiting-status"
+  *ngIf="['connecting', 'disconnecting'].includes((ledController.connectionStatus | async) || '')">
+  {{ (ledController.connectionStatus | async) }}...
+</p>
+
+<app-color-picker #colorPicker (input)="colorChange($event)"
+  [hidden]="(ledController.connectionStatus | async) !== 'connected'">
 </app-color-picker>
-<button (click)="ledController.disconnect()" *ngIf="ledController.connected | async">Disconnect</button>
+<button (click)="ledController.disconnect()"
+  *ngIf="(ledController.connectionStatus | async) === 'connected'">Disconnect</button>
 
 <hr />
 
