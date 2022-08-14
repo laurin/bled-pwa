@@ -10,6 +10,9 @@ MIT
 @angular/platform-browser
 MIT
 
+@angular/service-worker
+MIT
+
 @jaames/iro
 MPL-2.0
 Mozilla Public License Version 2.0
