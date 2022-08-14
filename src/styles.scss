@@ -3,6 +3,12 @@
   --color-text: #4A9CD6;
 }
 
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
 body {
   display: flex;
   align-items: center;
@@ -10,6 +16,7 @@ body {
   font-family: sans-serif;
   color: var(--color-text);
   background: var(--color-bg);
+  padding: 2rem;
 }
 
 button {
@@ -19,6 +26,7 @@ button {
   padding: .5em 1em;
   font-size: 1.5rem;
   font-weight: bold;
+  cursor: pointer;
 }
 
 body:not(.connected) .only-connected {
@@ -27,4 +35,17 @@ body:not(.connected) .only-connected {
 
 body.connected .only-not-connected {
   display: none;
+}
+
+hr {
+  width: 100%;
+  border: none;
+  height: 3px;
+  background: #fff4;
+}
+
+h1,
+h2,
+h3 {
+  text-align: center;
 }

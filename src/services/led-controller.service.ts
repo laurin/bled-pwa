@@ -24,6 +24,10 @@ export class LedControllerService {
       }]
     });
     console.log('device selected');
+    this.setDevice(bleDevice);
+  }
+
+  async setDevice(bleDevice: BluetoothDevice) {
     bleDevice.addEventListener('gattserverdisconnected', () => this.connected.next(false));
     const gattServer = await bleDevice.gatt!.connect();
     console.log('gatt server connected');
@@ -50,6 +54,15 @@ export class LedControllerService {
     if ([r, g, b].every(v => !isNaN(v))) {
       this.color.next({ r, g, b });
     }
+  }
+
+  getPreviousDevices() {
+    // @ts-ignore
+    return navigator.bluetooth.getDevices({
+      filters: [{
+        services: [LED_SERVICE_UUID],
+      }]
+    });
   }
 
   async setColor(color: RgbColor) {

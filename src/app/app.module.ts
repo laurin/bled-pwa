@@ -3,11 +3,13 @@ import { BrowserModule } from '@angular/platform-browser';
 
 import { AppComponent } from './app.component';
 import { ColorPickerComponent } from './color-picker/color-picker.component';
+import { PreviousDevicesComponent } from './previous-devices/previous-devices.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    ColorPickerComponent
+    ColorPickerComponent,
+    PreviousDevicesComponent
   ],
   imports: [
     BrowserModule

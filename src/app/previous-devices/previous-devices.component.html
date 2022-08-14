@@ -1,0 +1,7 @@
+<h2>Previous Devices</h2>
+<div class="devices">
+  <div class="device" *ngFor="let device of devices" (click)="connect(device)">
+    <span class="name">{{ device.name }}</span>
+    <span class="forget" (click)="forget(device)">&times;</span>
+  </div>
+</div>

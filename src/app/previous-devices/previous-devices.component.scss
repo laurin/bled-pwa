@@ -1,0 +1,39 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.devices {
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+}
+
+.device {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 4rem;
+  width: 300px;
+  background: #fff1;
+  cursor: pointer;
+  padding: 1rem;
+
+  .name {
+    font-weight: bold;
+    font-size: 1.3rem;
+  }
+
+  .forget {
+    font-size: 2rem;
+  }
+
+  &:hover {
+    background: #fff3;
+  }
+
+  &:active {
+    background: #fff5;
+  }
+}
