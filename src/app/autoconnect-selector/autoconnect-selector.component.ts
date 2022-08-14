@@ -9,7 +9,7 @@ import { LedControllerService } from '../../services/led-controller.service';
 export class AutoconnectSelectorComponent implements OnInit {
 
   devices: BluetoothDevice[] = [];
-  selectedDevice?: string;
+  selectedDevice: string = "undefined";
 
   constructor(
     private ledController: LedControllerService,
@@ -17,7 +17,7 @@ export class AutoconnectSelectorComponent implements OnInit {
 
   async ngOnInit() {
     this.devices = await this.ledController.getPreviousDevices();
-    this.selectedDevice = this.ledController.getAutoconnect();
+    this.selectedDevice = this.ledController.getAutoconnect() || "undefined";
   }
 
   onChange(event: any) {

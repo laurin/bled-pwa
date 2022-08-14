@@ -56,10 +56,8 @@ export class LedControllerService {
   }
 
   private applyColor(value: DataView) {
-    const [r, g, b] = [...(new Uint8Array(value.buffer))];
-    if ([r, g, b].every(v => !isNaN(v))) {
-      this.color.next({ r, g, b });
-    }
+    const [r = 0, g = 0, b = 0] = [...(new Uint8Array(value.buffer))];
+    this.color.next({ r, g, b });
   }
 
   getPreviousDevices() {
@@ -101,8 +99,8 @@ export class LedControllerService {
     }
   }
 
-  setAutoconnect(deviceId: string | undefined) {
-    if (deviceId) {
+  setAutoconnect(deviceId: string) {
+    if (deviceId !== "undefined") {
       this.localStorage.set('bled-autoconnect-id', deviceId);
     } else {
       this.localStorage.remove('bled-autoconnect-id');
