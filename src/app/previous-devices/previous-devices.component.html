@@ -1,4 +1,5 @@
 <h2>Previous Devices</h2>
+<p *ngIf="devices.length === 0">No previous devices...</p>
 <div class="devices">
   <div class="device" *ngFor="let device of devices" (click)="connect(device)">
     <span class="name">{{ device.name }}</span>
