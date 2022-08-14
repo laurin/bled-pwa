@@ -1,1 +1,30 @@
-/* You can add global styles to this file, and also import other style files */
+:root {
+  --color-bg: #111;
+  --color-text: #4A9CD6;
+}
+
+body {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  font-family: sans-serif;
+  color: var(--color-text);
+  background: var(--color-bg);
+}
+
+button {
+  background: none;
+  border: solid 2px var(--color-text);
+  color: var(--color-text);
+  padding: .5em 1em;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+body:not(.connected) .only-connected {
+  display: none;
+}
+
+body.connected .only-not-connected {
+  display: none;
+}
