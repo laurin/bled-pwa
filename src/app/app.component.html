@@ -3,7 +3,7 @@
 <ng-container *ngIf="(ledController.connectionStatus | async) === 'disconnected'">
   <app-previous-devices></app-previous-devices>
   <button (click)="pair()">Scan</button>
-  <hr>
+  <hr />
   <h2>Autoconnect</h2>
   <app-autoconnect-selector></app-autoconnect-selector>
 </ng-container>
@@ -16,7 +16,10 @@
 <app-color-picker #colorPicker (input)="colorChange($event)"
   [hidden]="(ledController.connectionStatus | async) !== 'connected'">
 </app-color-picker>
-<button (click)="ledController.disconnect()"
-  *ngIf="(ledController.connectionStatus | async) === 'connected'">Disconnect</button>
 
 <hr />
+
+<ng-container *ngIf="(ledController.connectionStatus | async) === 'connected'">
+  <button (click)="ledController.disconnect()">Disconnect</button>
+  <hr />
+</ng-container>
