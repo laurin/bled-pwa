@@ -3,6 +3,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { RgbColor } from '../app/color-picker/color-picker.component';
+import { LocalStorageService } from './local-storage.service';
 
 const LED_SERVICE_UUID = "c7564aae-99ee-4874-848b-8a01f00d71bd";
 const LED_COLOR_CHARACTERISTIC_UUID = "88db6efe-6abe-477f-bced-b5b0f5984320";
@@ -15,7 +16,9 @@ export class LedControllerService {
   color = new BehaviorSubject({ r: 0, g: 0, b: 0 });
   private colorCharacteristic?: BluetoothRemoteGATTCharacteristic;
 
-  constructor() { }
+  constructor(
+    private localStorage: LocalStorageService,
+  ) { }
 
   async selectDevice() {
     const bleDevice = await navigator.bluetooth.requestDevice({
@@ -75,5 +78,38 @@ export class LedControllerService {
 
   async disconnect() {
     await this.colorCharacteristic?.service.device.gatt?.disconnect();
+  }
+
+  async connectToPrevious(device: BluetoothDevice) {
+    const abortController = new AbortController();
+    device.addEventListener('advertisementreceived', () => {
+      abortController.abort();
+      this.setDevice(device);
+      // @ts-ignore
+      device.removeAllListeners('advertisementreceived');
+    });
+    device.watchAdvertisements({ signal: abortController.signal });
+  }
+
+  async autoconnect() {
+    const deviceId = this.getAutoconnect();
+    const device = (await this.getPreviousDevices())
+      .find(device => device.id === deviceId);
+    if (device) {
+      console.log(`trying to autoconnect to ${device.name}`);
+      this.connectToPrevious(device);
+    }
+  }
+
+  setAutoconnect(deviceId: string | undefined) {
+    if (deviceId) {
+      this.localStorage.set('bled-autoconnect-id', deviceId);
+    } else {
+      this.localStorage.remove('bled-autoconnect-id');
+    }
+  }
+
+  getAutoconnect(): string | undefined {
+    return this.localStorage.get('bled-autoconnect-id');
   }
 }

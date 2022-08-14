@@ -19,6 +19,7 @@ export class AppComponent implements AfterViewInit {
     this.ledController.color.subscribe(color => {
       this.colorpicker.set(color);
     });
+    this.ledController.autoconnect();
   }
 
   @debounce(100)

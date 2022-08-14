@@ -24,14 +24,7 @@ export class PreviousDevicesComponent implements OnInit {
   }
 
   connect(device: BluetoothDevice) {
-    const abortController = new AbortController();
-    device.addEventListener('advertisementreceived', event => {
-      abortController.abort();
-      this.ledController.setDevice(device);
-      // @ts-ignore
-      device.removeAllListeners('advertisementreceived');
-    });
-    device.watchAdvertisements({ signal: abortController.signal });
+    this.ledController.connectToPrevious(device);
   }
 
   async forget(device: BluetoothDevice) {

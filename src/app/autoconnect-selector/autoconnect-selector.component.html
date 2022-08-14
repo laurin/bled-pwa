@@ -1,0 +1,4 @@
+<select (input)="onChange($event)" [(ngModel)]="selectedDevice">
+  <option [value]="null">None</option>
+  <option *ngFor="let device of devices" [value]="device.id">{{ device.name }}</option>
+</select>
