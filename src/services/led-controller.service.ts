@@ -142,6 +142,10 @@ export class LedControllerService {
   }
 
   startUpdate() {
-    this.characteristics.get(RSU_START_CHARACTERISTIC_UUID)?.writeValueWithoutResponse(new TextEncoder().encode('https://lamp-firmware.gh.l5w.de/firmware.bin'));
+    const url = prompt('url to update from', 'https://f.l5w.de/firmware.bin');
+    if (!url) {
+      return;
+    }
+    this.characteristics.get(RSU_START_CHARACTERISTIC_UUID)?.writeValueWithoutResponse(new TextEncoder().encode(url));
   }
 }
