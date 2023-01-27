@@ -9,6 +9,7 @@ import { FormsModule } from '@angular/forms';
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { environment } from '../environments/environment';
 import { UpdateNotificationComponent } from './update-notification/update-notification.component';
+import { BledControlsComponent } from './bled-controls/bled-controls.component';
 
 @NgModule({
   declarations: [
@@ -17,6 +18,7 @@ import { UpdateNotificationComponent } from './update-notification/update-notifi
     PreviousDevicesComponent,
     AutoconnectSelectorComponent,
     UpdateNotificationComponent,
+    BledControlsComponent,
   ],
   imports: [
     BrowserModule,

@@ -8,12 +8,13 @@ import { LocalStorageService } from './local-storage.service';
 const LED_SERVICE_UUID = "c7564aae-99ee-4874-848b-8a01f00d71bd";
 const LED_COLOR_CHARACTERISTIC_UUID = "88db6efe-6abe-477f-bced-b5b0f5984320";
 
-const RSU_SERVICE_UUID = "5f3b4458-9ae1-4f55-a3db-61e2399ff25c";
+const DEVICE_MANAGEMENT_SERVICE_UUID = "5f3b4458-9ae1-4f55-a3db-61e2399ff25c";
 const RSU_START_CHARACTERISTIC_UUID = "46db1e53-956a-4b9b-9e83-e3d69782471a";
+const REBOOT_CHARACTERISTIC_UUID = "f60cb6ab-c991-4ff4-b870-cbb32cdc5ff6";
 
 export type ConnectionStatus = 'disconnected' | 'connecting' | 'connected' | 'disconnecting';
 
-type LedControllerFeature = 'rsu';
+type LedControllerFeature = 'rsu' | 'reboot';
 
 @Injectable({
   providedIn: 'root'
@@ -33,7 +34,7 @@ export class LedControllerService {
       filters: [{
         services: [LED_SERVICE_UUID],
       }],
-      optionalServices: [RSU_SERVICE_UUID],
+      optionalServices: [DEVICE_MANAGEMENT_SERVICE_UUID],
     });
     console.log('device selected');
     this.setDevice(bleDevice);
@@ -137,15 +138,22 @@ export class LedControllerService {
 
   hasFeature(featureId: LedControllerFeature) {
     switch (featureId) {
-      case 'rsu': return this.services.has(RSU_SERVICE_UUID);
+      case 'rsu': return this.characteristics.has(RSU_START_CHARACTERISTIC_UUID);
+      case 'reboot': return this.characteristics.has(REBOOT_CHARACTERISTIC_UUID);
     }
   }
 
-  startUpdate() {
+  async startUpdate() {
     const url = prompt('url to update from', 'https://lamp-firmware.gh.l5w.de/firmware.bin');
     if (!url) {
       return;
     }
-    this.characteristics.get(RSU_START_CHARACTERISTIC_UUID)?.writeValueWithoutResponse(new TextEncoder().encode(url));
+    await this.characteristics.get(RSU_START_CHARACTERISTIC_UUID)?.writeValueWithoutResponse(new TextEncoder().encode(url));
+    await this.disconnect();
+  }
+
+  async reboot() {
+    await this.characteristics.get(REBOOT_CHARACTERISTIC_UUID)?.writeValueWithoutResponse(new ArrayBuffer(0));
+    await this.disconnect();
   }
 }
