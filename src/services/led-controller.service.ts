@@ -11,10 +11,14 @@ const LED_COLOR_CHARACTERISTIC_UUID = "88db6efe-6abe-477f-bced-b5b0f5984320";
 const DEVICE_MANAGEMENT_SERVICE_UUID = "5f3b4458-9ae1-4f55-a3db-61e2399ff25c";
 const RSU_START_CHARACTERISTIC_UUID = "46db1e53-956a-4b9b-9e83-e3d69782471a";
 const REBOOT_CHARACTERISTIC_UUID = "f60cb6ab-c991-4ff4-b870-cbb32cdc5ff6";
+const SETTINGS_CHARACTERISTIC_UUID = "266dba98-abcf-45e5-9772-a26ad6680f7f";
 
 export type ConnectionStatus = 'disconnected' | 'connecting' | 'connected' | 'disconnecting';
 
-type LedControllerFeature = 'rsu' | 'reboot';
+export const settingsProperties = ['num_leds', 'device_name', 'wifi_ssid', 'wifi_password'] as const;
+export type SettingPropertyName = typeof settingsProperties[number];
+
+type LedControllerFeature = 'rsu' | 'reboot' | 'settings';
 
 @Injectable({
   providedIn: 'root'
@@ -140,6 +144,7 @@ export class LedControllerService {
     switch (featureId) {
       case 'rsu': return this.characteristics.has(RSU_START_CHARACTERISTIC_UUID);
       case 'reboot': return this.characteristics.has(REBOOT_CHARACTERISTIC_UUID);
+      case 'settings': return this.characteristics.has(SETTINGS_CHARACTERISTIC_UUID);
     }
   }
 
@@ -155,5 +160,12 @@ export class LedControllerService {
   async reboot() {
     await this.characteristics.get(REBOOT_CHARACTERISTIC_UUID)?.writeValueWithoutResponse(new ArrayBuffer(0));
     await this.disconnect();
+  }
+
+  async writeSettingsValue(key: string, value: string | number) {
+    await this.characteristics.get(SETTINGS_CHARACTERISTIC_UUID)
+      ?.writeValueWithoutResponse(new TextEncoder().encode(`${key}\t${value}`));
+    console.log(new TextEncoder().encode(`${key}\t${value}`));
+
   }
 }

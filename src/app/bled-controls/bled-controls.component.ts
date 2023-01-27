@@ -1,5 +1,5 @@
 import { AfterViewInit, Component, ViewChild } from '@angular/core';
-import { LedControllerService } from 'src/services/led-controller.service';
+import { LedControllerService, SettingPropertyName, settingsProperties } from 'src/services/led-controller.service';
 import { ColorPickerComponent } from '../color-picker/color-picker.component';
 import { debounce } from '../../decorators/debounce.decorator';
 
@@ -10,6 +10,9 @@ import { debounce } from '../../decorators/debounce.decorator';
 })
 export class BledControlsComponent implements AfterViewInit {
   @ViewChild('colorPicker') colorpicker!: ColorPickerComponent;
+
+  settingsProperties = settingsProperties;
+  selectedSettingsProperty: SettingPropertyName = 'device_name';
 
   constructor(
     public ledController: LedControllerService,
@@ -27,5 +30,11 @@ export class BledControlsComponent implements AfterViewInit {
     this.ledController.autoconnect();
   }
 
-
+  updateSettings(): void {
+    const value = prompt(`value for setttings-property "${this.selectedSettingsProperty}"`);
+    if (!value) {
+      return;
+    }
+    this.ledController.writeSettingsValue(this.selectedSettingsProperty, value);
+  }
 }
