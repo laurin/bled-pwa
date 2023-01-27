@@ -142,7 +142,7 @@ export class LedControllerService {
   }
 
   startUpdate() {
-    const url = prompt('url to update from', 'https://f.l5w.de/firmware.bin');
+    const url = prompt('url to update from', 'https://lamp-firmware.gh.l5w.de/firmware.bin');
     if (!url) {
       return;
     }
