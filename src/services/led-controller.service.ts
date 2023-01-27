@@ -8,7 +8,12 @@ import { LocalStorageService } from './local-storage.service';
 const LED_SERVICE_UUID = "c7564aae-99ee-4874-848b-8a01f00d71bd";
 const LED_COLOR_CHARACTERISTIC_UUID = "88db6efe-6abe-477f-bced-b5b0f5984320";
 
+const RSU_SERVICE_UUID = "5f3b4458-9ae1-4f55-a3db-61e2399ff25c";
+const RSU_START_CHARACTERISTIC_UUID = "46db1e53-956a-4b9b-9e83-e3d69782471a";
+
 export type ConnectionStatus = 'disconnected' | 'connecting' | 'connected' | 'disconnecting';
+
+type LedControllerFeature = 'rsu';
 
 @Injectable({
   providedIn: 'root'
@@ -16,7 +21,8 @@ export type ConnectionStatus = 'disconnected' | 'connecting' | 'connected' | 'di
 export class LedControllerService {
   connectionStatus = new BehaviorSubject<ConnectionStatus>('disconnected');
   color = new BehaviorSubject({ r: 0, g: 0, b: 0 });
-  private colorCharacteristic?: BluetoothRemoteGATTCharacteristic;
+  services = new Map<string, BluetoothRemoteGATTService>();
+  characteristics = new Map<string, BluetoothRemoteGATTCharacteristic>();
 
   constructor(
     private localStorage: LocalStorageService,
@@ -26,7 +32,8 @@ export class LedControllerService {
     const bleDevice = await navigator.bluetooth.requestDevice({
       filters: [{
         services: [LED_SERVICE_UUID],
-      }]
+      }],
+      optionalServices: [RSU_SERVICE_UUID],
     });
     console.log('device selected');
     this.setDevice(bleDevice);
@@ -38,22 +45,32 @@ export class LedControllerService {
       bleDevice.addEventListener('gattserverdisconnected', () => {
         this.connectionStatus.next('disconnected');
         console.log('device disconnected');
-        delete this.colorCharacteristic;
+        this.services.clear();
+        this.characteristics.clear();
       });
       const gattServer = await bleDevice.gatt!.connect();
       console.log('gatt server connected');
-      const ledService = await gattServer.getPrimaryService(LED_SERVICE_UUID);
+
+      for (const service of await gattServer.getPrimaryServices()) {
+        this.services.set(service.uuid, service);
+
+        for (const characteristic of await service.getCharacteristics()) {
+          this.characteristics.set(characteristic.uuid, characteristic);
+        }
+      }
+
       console.log('service retrieved');
-      this.colorCharacteristic = await ledService.getCharacteristic(LED_COLOR_CHARACTERISTIC_UUID);
+      const colorCharacteristic = await this.characteristics.get(LED_COLOR_CHARACTERISTIC_UUID)!;
+
       console.log('characteristic retrieved');
-      await this.colorCharacteristic.startNotifications();
+      await colorCharacteristic.startNotifications();
       console.log('notifications started');
-      this.colorCharacteristic.addEventListener('characteristicvaluechanged', (event) => {
+      colorCharacteristic.addEventListener('characteristicvaluechanged', (event) => {
         // @ts-ignore
         this.applyColor(event.srcElement.value);
       });
       console.log('event listener added');
-      const val = await this.colorCharacteristic.readValue();
+      const val = await colorCharacteristic.readValue();
       this.applyColor(val);
       this.connectionStatus.next('connected');
     } catch {
@@ -76,13 +93,13 @@ export class LedControllerService {
   }
 
   async setColor(color: RgbColor) {
-    if (!this.colorCharacteristic) { return; }
-    await this.colorCharacteristic.writeValueWithoutResponse(new Uint8Array([color.r, color.g, color.b]));
+    await this.characteristics.get(LED_COLOR_CHARACTERISTIC_UUID)
+      ?.writeValueWithoutResponse(new Uint8Array([color.r, color.g, color.b]));
   }
 
   async disconnect() {
     this.connectionStatus.next('disconnecting');
-    await this.colorCharacteristic?.service.device.gatt?.disconnect();
+    await this.characteristics.get(LED_COLOR_CHARACTERISTIC_UUID)?.service.device.gatt?.disconnect();
   }
 
   async connectToPrevious(device: BluetoothDevice) {
@@ -116,5 +133,15 @@ export class LedControllerService {
 
   getAutoconnect(): string | undefined {
     return this.localStorage.get('bled-autoconnect-id');
+  }
+
+  hasFeature(featureId: LedControllerFeature) {
+    switch (featureId) {
+      case 'rsu': return this.services.has(RSU_SERVICE_UUID);
+    }
+  }
+
+  startUpdate() {
+    this.characteristics.get(RSU_START_CHARACTERISTIC_UUID)?.writeValueWithoutResponse(new TextEncoder().encode('https://lamp-firmware.gh.l5w.de/firmware.bin'));
   }
 }

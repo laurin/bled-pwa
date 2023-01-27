@@ -21,6 +21,7 @@
 
 <ng-container *ngIf="(ledController.connectionStatus | async) === 'connected'">
   <button (click)="ledController.disconnect()">Disconnect</button>
+  <button *ngIf="ledController.hasFeature('rsu')" (click)="ledController.startUpdate()">Update</button>
   <hr />
 </ng-container>
 
