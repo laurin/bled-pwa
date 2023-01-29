@@ -15,7 +15,7 @@ const SETTINGS_CHARACTERISTIC_UUID = "266dba98-abcf-45e5-9772-a26ad6680f7f";
 
 export type ConnectionStatus = 'disconnected' | 'connecting' | 'connected' | 'disconnecting';
 
-export const settingsProperties = ['num_leds', 'device_name', 'wifi_ssid', 'wifi_password'] as const;
+export const settingsProperties = ['num_leds', 'fps', 'brightness', 'device_name', 'wifi_ssid', 'wifi_password'] as const;
 export type SettingPropertyName = typeof settingsProperties[number];
 
 type LedControllerFeature = 'rsu' | 'reboot' | 'settings';
@@ -165,7 +165,5 @@ export class LedControllerService {
   async writeSettingsValue(key: string, value: string | number) {
     await this.characteristics.get(SETTINGS_CHARACTERISTIC_UUID)
       ?.writeValueWithoutResponse(new TextEncoder().encode(`${key}\t${value}`));
-    console.log(new TextEncoder().encode(`${key}\t${value}`));
-
   }
 }
