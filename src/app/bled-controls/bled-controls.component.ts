@@ -31,7 +31,10 @@ export class BledControlsComponent implements AfterViewInit {
   }
 
   updateSettings(): void {
-    const value = prompt(`value for setttings-property "${this.selectedSettingsProperty}"`);
+    const value = prompt(
+      `value for setttings-property "${this.selectedSettingsProperty}"`,
+      this.ledController.settings.get(this.selectedSettingsProperty)?.toString(),
+    );
     if (!value) {
       return;
     }

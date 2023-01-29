@@ -28,6 +28,7 @@ export class LedControllerService {
   color = new BehaviorSubject({ r: 0, g: 0, b: 0 });
   services = new Map<string, BluetoothRemoteGATTService>();
   characteristics = new Map<string, BluetoothRemoteGATTCharacteristic>();
+  settings = new Map<SettingPropertyName, string | number>();
 
   constructor(
     private localStorage: LocalStorageService,
@@ -77,6 +78,7 @@ export class LedControllerService {
       console.log('event listener added');
       const val = await colorCharacteristic.readValue();
       this.applyColor(val);
+      this.loadSettings();
       this.connectionStatus.next('connected');
     } catch {
       this.connectionStatus.next('disconnected');
@@ -165,5 +167,22 @@ export class LedControllerService {
   async writeSettingsValue(key: string, value: string | number) {
     await this.characteristics.get(SETTINGS_CHARACTERISTIC_UUID)
       ?.writeValueWithoutResponse(new TextEncoder().encode(`${key}\t${value}`));
+    this.loadSettings();
+  }
+
+  async loadSettings() {
+    const data = await this.characteristics.get(SETTINGS_CHARACTERISTIC_UUID)
+      ?.readValue();
+    const str = new TextDecoder().decode(data);
+    const arr = str.split('\t');
+    for (let i = 0; i < arr.length - 1;) {
+      const key = arr[i++] as SettingPropertyName;
+      const value = arr[i++];
+      if (!isNaN(parseFloat(value))) {
+        this.settings.set(key, parseFloat(value));
+      } else {
+        this.settings.set(key, value);
+      }
+    }
   }
 }

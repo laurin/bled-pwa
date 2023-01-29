@@ -16,6 +16,12 @@
             <option *ngFor="let propertyName of settingsProperties" [value]="propertyName">{{ propertyName }}</option>
         </select>
         <button (click)="updateSettings()">Set Value</button>
+        <table>
+            <tr *ngFor="let setting of ledController.settings | keyvalue">
+                <th>{{setting.key}}</th>
+                <td>{{setting.value}}</td>
+            </tr>
+        </table>
         <hr>
     </ng-container>
 </ng-container>
