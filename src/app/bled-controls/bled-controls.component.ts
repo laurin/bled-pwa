@@ -35,9 +35,9 @@ export class BledControlsComponent implements AfterViewInit {
       `value for setttings-property "${this.selectedSettingsProperty}"`,
       this.ledController.settings.get(this.selectedSettingsProperty)?.toString(),
     );
-    if (!value) {
+    if (value === null) {
       return;
     }
-    this.ledController.writeSettingsValue(this.selectedSettingsProperty, value);
+    this.ledController.writeSettingsValue(this.selectedSettingsProperty, value.replace('\r', ''));
   }
 }

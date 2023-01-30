@@ -2,8 +2,11 @@
 
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
+import { sleep } from 'src/util/promise.util';
 import { RgbColor } from '../app/color-picker/color-picker.component';
 import { LocalStorageService } from './local-storage.service';
+
+const BLE_CHARACTERISTIC_CHUNK_SIZE = 450;
 
 const LED_SERVICE_UUID = "c7564aae-99ee-4874-848b-8a01f00d71bd";
 const LED_COLOR_CHARACTERISTIC_UUID = "88db6efe-6abe-477f-bced-b5b0f5984320";
@@ -15,7 +18,7 @@ const SETTINGS_CHARACTERISTIC_UUID = "266dba98-abcf-45e5-9772-a26ad6680f7f";
 
 export type ConnectionStatus = 'disconnected' | 'connecting' | 'connected' | 'disconnecting';
 
-export const settingsProperties = ['num_leds', 'fps', 'brightness', 'device_name', 'wifi_ssid', 'wifi_password'] as const;
+export const settingsProperties = ['num_leds', 'fps', 'brightness', 'device_name', 'wifi_ssid', 'wifi_password', 'root_ca_cert'] as const;
 export type SettingPropertyName = typeof settingsProperties[number];
 
 type LedControllerFeature = 'rsu' | 'reboot' | 'settings';
@@ -165,9 +168,31 @@ export class LedControllerService {
   }
 
   async writeSettingsValue(key: string, value: string | number) {
-    await this.characteristics.get(SETTINGS_CHARACTERISTIC_UUID)
-      ?.writeValueWithoutResponse(new TextEncoder().encode(`${key}\t${value}`));
+    const data = value.toString();
+    const write = (data: string) =>
+      this.characteristics.get(SETTINGS_CHARACTERISTIC_UUID)
+        ?.writeValueWithoutResponse(new TextEncoder().encode(data));
+
+    if (data.length < BLE_CHARACTERISTIC_CHUNK_SIZE) {
+      console.log(`write setting key '${key}': '${data}'`);
+      await write(`${key}\t${value}`);
+    } else {
+      let fragment = 0;
+      for (let i = 0; i < data.length; i += BLE_CHARACTERISTIC_CHUNK_SIZE) {
+        const chunk = data.substring(i, i + BLE_CHARACTERISTIC_CHUNK_SIZE);
+        await write(`${key}\t${chunk}\t${fragment}`);
+        console.log(`write setting key '${key}' fragment ${fragment}\n`, chunk);
+        fragment++;
+      }
+      await this.saveSettings();
+    }
     this.loadSettings();
+  }
+
+  saveSettings() {
+    console.log('saving settings');
+    return this.characteristics.get(SETTINGS_CHARACTERISTIC_UUID)
+      ?.writeValueWithoutResponse(new TextEncoder().encode(`save\t`));
   }
 
   async loadSettings() {
