@@ -11,10 +11,18 @@ app-color-picker {
 }
 
 table {
+    display: block;
     text-align: left;
+    max-width: 100%;
+    table-layout: fixed;
 
     td,
     th {
         padding: 0 .5em;
+    }
+
+    td {
+        word-wrap: break-word;
+        word-break: break-word;
     }
 }
