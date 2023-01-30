@@ -203,7 +203,7 @@ export class LedControllerService {
     for (let i = 0; i < arr.length - 1;) {
       const key = arr[i++] as SettingPropertyName;
       const value = arr[i++];
-      if (!isNaN(parseFloat(value))) {
+      if (value.match(/^\d*\.?\d*$/)) {
         this.settings.set(key, parseFloat(value));
       } else {
         this.settings.set(key, value);
