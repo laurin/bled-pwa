@@ -56,6 +56,7 @@ export class LedControllerService {
         console.log('device disconnected');
         this.services.clear();
         this.characteristics.clear();
+        this.settings.clear();
       });
       const gattServer = await bleDevice.gatt!.connect();
       console.log('gatt server connected');
