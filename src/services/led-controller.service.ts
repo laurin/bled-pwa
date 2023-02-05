@@ -18,7 +18,7 @@ const SETTINGS_CHARACTERISTIC_UUID = "266dba98-abcf-45e5-9772-a26ad6680f7f";
 
 export type ConnectionStatus = 'disconnected' | 'connecting' | 'connected' | 'disconnecting';
 
-export const settingsProperties = ['num_leds', 'fps', 'brightness', 'device_name', 'wifi_ssid', 'wifi_password', 'root_ca_cert'] as const;
+export const settingsProperties = ['model', 'num_leds', 'fps', 'brightness', 'device_name', 'wifi_ssid', 'wifi_password', 'root_ca_cert'] as const;
 export type SettingPropertyName = typeof settingsProperties[number];
 
 type LedControllerFeature = 'rsu' | 'reboot' | 'settings';
