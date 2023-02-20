@@ -1,5 +1,5 @@
 import { AfterViewInit, Component, ViewChild } from '@angular/core';
-import { LedControllerService } from 'src/services/led-controller.service';
+import { GuiMode, GUI_MODES, LedControllerService } from 'src/services/led-controller.service';
 import { ColorPickerComponent } from '../color-picker/color-picker.component';
 import { debounce } from '../../decorators/debounce.decorator';
 
@@ -10,6 +10,7 @@ import { debounce } from '../../decorators/debounce.decorator';
 })
 export class GuiModeControlsComponent implements AfterViewInit {
   @ViewChild('colorPicker') colorpicker!: ColorPickerComponent;
+  GUI_MODES = GUI_MODES;
 
   constructor(
     public ledController: LedControllerService,
@@ -25,5 +26,9 @@ export class GuiModeControlsComponent implements AfterViewInit {
       this.colorpicker.set(color);
     });
     this.ledController.autoconnect();
+  }
+
+  onModeChange(newMode: GuiMode) {
+    this.ledController.setGuiMode(newMode);
   }
 }

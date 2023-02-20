@@ -1,3 +1,12 @@
-<app-color-picker #colorPicker (input)="colorChange($event)"
-    [hidden]="(ledController.connectionStatus | async) !== 'connected'">
-</app-color-picker>
+<div class="controls"
+    [class.hidden]="!(ledController.guiMode | async) || (ledController.connectionStatus | async) !== 'connected'">
+    <div>
+        <b>Mode: </b>
+        <select [ngModel]="ledController.guiMode | async" (ngModelChange)="onModeChange($event)">
+            <option *ngFor="let mode of GUI_MODES" [value]="mode">{{ mode }}</option>
+        </select>
+    </div>
+
+    <app-color-picker #colorPicker (input)="colorChange($event)" [hidden]="(ledController.guiMode | async) !== 'solid'">
+    </app-color-picker>
+</div>

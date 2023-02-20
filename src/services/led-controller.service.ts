@@ -24,7 +24,7 @@ export type SettingPropertyName = typeof settingsProperties[number];
 
 type LedControllerFeature = 'rsu' | 'reboot' | 'settings';
 
-export const GUI_MODES = ['solid', 'clock'];
+export const GUI_MODES = ['solid', 'clock'] as const;
 export type GuiMode = typeof GUI_MODES[number];
 
 @Injectable({
@@ -33,6 +33,7 @@ export type GuiMode = typeof GUI_MODES[number];
 export class LedControllerService {
   connectionStatus = new BehaviorSubject<ConnectionStatus>('disconnected');
   color = new BehaviorSubject({ r: 0, g: 0, b: 0 });
+  guiMode = new BehaviorSubject<GuiMode>('solid');
   services = new Map<string, BluetoothRemoteGATTService>();
   characteristics = new Map<string, BluetoothRemoteGATTCharacteristic>();
   settings = new Map<SettingPropertyName, string | number>();
@@ -74,18 +75,18 @@ export class LedControllerService {
       }
 
       console.log('service retrieved');
-      const colorCharacteristic = await this.characteristics.get(GUI_MODE_SOLID_COLOR_CHARACTERISTIC_UUID)!;
 
-      console.log('characteristic retrieved');
-      await colorCharacteristic.startNotifications();
-      console.log('notifications started');
-      colorCharacteristic.addEventListener('characteristicvaluechanged', (event) => {
-        // @ts-ignore
-        this.applyColor(event.srcElement.value);
-      });
-      console.log('event listener added');
-      const val = await colorCharacteristic.readValue();
-      this.applyColor(val);
+      await this.subscribeCharacteristic(
+        GUI_MODE_SOLID_COLOR_CHARACTERISTIC_UUID,
+        data => this.applyColor(data),
+      );
+
+      await this.subscribeCharacteristic(
+        GUI_MODE_ACTIVE_CHARACTERISTIC_UUID,
+        data => this.applyGuiMode(data),
+      );
+
+
       this.loadSettings();
       this.connectionStatus.next('connected');
     } catch {
@@ -93,9 +94,29 @@ export class LedControllerService {
     }
   }
 
+  private async subscribeCharacteristic(uuid: string, callback: (data: DataView) => void) {
+
+    const characteristic = await this.characteristics.get(uuid)!;
+    await characteristic.startNotifications();
+    characteristic.addEventListener('characteristicvaluechanged', (event) => {
+      // @ts-ignore
+      callback(event.srcElement.value);
+    });
+    const val = await characteristic.readValue();
+    callback(val);
+  }
+
   private applyColor(value: DataView) {
     const [r = 0, g = 0, b = 0] = [...(new Uint8Array(value.buffer))];
     this.color.next({ r, g, b });
+  }
+
+  private applyGuiMode(value: DataView) {
+    const mode = new TextDecoder().decode(value) as GuiMode;
+    if (!GUI_MODES.includes(mode)) {
+      return console.log(`unknown gui mode "${mode}"`);
+    }
+    this.guiMode.next(mode);
   }
 
   getPreviousDevices() {
