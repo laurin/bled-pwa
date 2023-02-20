@@ -1,0 +1,3 @@
+<app-color-picker #colorPicker (input)="colorChange($event)"
+    [hidden]="(ledController.connectionStatus | async) !== 'connected'">
+</app-color-picker>

@@ -1,0 +1,21 @@
+<ng-container *ngIf="(ledController.connectionStatus | async) === 'connected'">
+    <ng-container *ngIf="ledController.hasFeature('settings')">
+        <h3>Update Settings</h3>
+        <select [(ngModel)]="selectedSettingsProperty">
+            <option *ngFor="let propertyName of settingsProperties" [value]="propertyName">{{ propertyName }}</option>
+        </select>
+        <button (click)="updateSettings()">Set Value</button>
+        <table>
+            <tr *ngFor="let setting of ledController.settings | keyvalue">
+                <th>{{setting.key}}</th>
+                <td>{{setting.value}}</td>
+            </tr>
+        </table>
+    </ng-container>
+
+    <hr>
+
+    <button (click)="ledController.disconnect()">Disconnect</button>
+    <button *ngIf="ledController.hasFeature('rsu')" (click)="ledController.startUpdate()">Update</button>
+    <button *ngIf="ledController.hasFeature('reboot')" (click)="ledController.reboot()">Reboot</button>
+</ng-container>

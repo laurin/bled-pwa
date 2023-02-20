@@ -9,20 +9,3 @@
 app-color-picker {
     margin: 3rem 0;
 }
-
-table {
-    display: block;
-    text-align: left;
-    max-width: 100%;
-    table-layout: fixed;
-
-    td,
-    th {
-        padding: 0.2em .5em;
-    }
-
-    td {
-        word-wrap: break-word;
-        word-break: break-word;
-    }
-}

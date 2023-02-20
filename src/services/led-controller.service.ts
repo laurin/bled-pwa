@@ -8,8 +8,9 @@ import { LocalStorageService } from './local-storage.service';
 
 const BLE_CHARACTERISTIC_CHUNK_SIZE = 450;
 
-const LED_SERVICE_UUID = "c7564aae-99ee-4874-848b-8a01f00d71bd";
-const LED_COLOR_CHARACTERISTIC_UUID = "88db6efe-6abe-477f-bced-b5b0f5984320";
+const GUI_MODE_SERVICE_UUID = "c7564aae-99ee-4874-848b-8a01f00d71bd";
+const GUI_MODE_SOLID_COLOR_CHARACTERISTIC_UUID = "88db6efe-6abe-477f-bced-b5b0f5984320";
+const GUI_MODE_ACTIVE_CHARACTERISTIC_UUID = "e3f5043e-f8f7-45bf-8723-7957bdb9c812";
 
 const DEVICE_MANAGEMENT_SERVICE_UUID = "5f3b4458-9ae1-4f55-a3db-61e2399ff25c";
 const RSU_START_CHARACTERISTIC_UUID = "46db1e53-956a-4b9b-9e83-e3d69782471a";
@@ -22,6 +23,9 @@ export const settingsProperties = ['model', 'num_leds', 'fps', 'brightness', 'de
 export type SettingPropertyName = typeof settingsProperties[number];
 
 type LedControllerFeature = 'rsu' | 'reboot' | 'settings';
+
+export const GUI_MODES = ['solid', 'clock'];
+export type GuiMode = typeof GUI_MODES[number];
 
 @Injectable({
   providedIn: 'root'
@@ -40,7 +44,7 @@ export class LedControllerService {
   async selectDevice() {
     const bleDevice = await navigator.bluetooth.requestDevice({
       filters: [{
-        services: [LED_SERVICE_UUID],
+        services: [GUI_MODE_SERVICE_UUID],
       }],
       optionalServices: [DEVICE_MANAGEMENT_SERVICE_UUID],
     });
@@ -70,7 +74,7 @@ export class LedControllerService {
       }
 
       console.log('service retrieved');
-      const colorCharacteristic = await this.characteristics.get(LED_COLOR_CHARACTERISTIC_UUID)!;
+      const colorCharacteristic = await this.characteristics.get(GUI_MODE_SOLID_COLOR_CHARACTERISTIC_UUID)!;
 
       console.log('characteristic retrieved');
       await colorCharacteristic.startNotifications();
@@ -98,19 +102,19 @@ export class LedControllerService {
     // @ts-ignore
     return navigator.bluetooth.getDevices({
       filters: [{
-        services: [LED_SERVICE_UUID],
+        services: [GUI_MODE_SERVICE_UUID],
       }]
     });
   }
 
   async setColor(color: RgbColor) {
-    await this.characteristics.get(LED_COLOR_CHARACTERISTIC_UUID)
+    await this.characteristics.get(GUI_MODE_SOLID_COLOR_CHARACTERISTIC_UUID)
       ?.writeValueWithoutResponse(new Uint8Array([color.r, color.g, color.b]));
   }
 
   async disconnect() {
     this.connectionStatus.next('disconnecting');
-    await this.characteristics.get(LED_COLOR_CHARACTERISTIC_UUID)?.service.device.gatt?.disconnect();
+    await this.characteristics.get(GUI_MODE_SOLID_COLOR_CHARACTERISTIC_UUID)?.service.device.gatt?.disconnect();
   }
 
   async connectToPrevious(device: BluetoothDevice) {
@@ -210,5 +214,11 @@ export class LedControllerService {
         this.settings.set(key, value);
       }
     }
+  }
+
+  setGuiMode(guiMode: GuiMode) {
+    console.log(`set gui mode to ${guiMode}`);
+    return this.characteristics.get(GUI_MODE_ACTIVE_CHARACTERISTIC_UUID)
+      ?.writeValueWithoutResponse(new TextEncoder().encode(guiMode));
   }
 }

@@ -10,6 +10,8 @@ import { ServiceWorkerModule } from '@angular/service-worker';
 import { environment } from '../environments/environment';
 import { UpdateNotificationComponent } from './update-notification/update-notification.component';
 import { BledControlsComponent } from './bled-controls/bled-controls.component';
+import { DeviceManagementControlsComponent } from './device-management-controls/device-management-controls.component';
+import { GuiModeControlsComponent } from './gui-mode-controls/gui-mode-controls.component';
 
 @NgModule({
   declarations: [
@@ -19,6 +21,8 @@ import { BledControlsComponent } from './bled-controls/bled-controls.component';
     AutoconnectSelectorComponent,
     UpdateNotificationComponent,
     BledControlsComponent,
+    DeviceManagementControlsComponent,
+    GuiModeControlsComponent,
   ],
   imports: [
     BrowserModule,
